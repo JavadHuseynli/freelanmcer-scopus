@@ -1,0 +1,165 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+{% if user.is_freelancer %}Təkliflərim{% else %}Layihələrimə Gələn Təkliflər{% endif %} - Freelancer Marketplace
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        {% if user.is_freelancer %}
+            Mənim Təkliflərim
+        {% else %}
+            Layihələrimə Gələn Təkliflər
+        {% endif %}
+    </h2>
+    <span class="badge bg-primary fs-6">{{ bids|length }} təklif</span>
+</div>
+
+<!-- Status filtri -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="btn-group" role="group">
+            <a href="?status=" class="btn btn-outline-primary {% if not request.GET.status %}active{% endif %}">
+                Hamısı
+            </a>
+            <a href="?status=active" class="btn btn-outline-success {% if request.GET.status == 'active' %}active{% endif %}">
+                Aktiv
+            </a>
+            <a href="?status=accepted" class="btn btn-outline-info {% if request.GET.status == 'accepted' %}active{% endif %}">
+                Qəbul edilmiş
+            </a>
+            <a href="?status=rejected" class="btn btn-outline-danger {% if request.GET.status == 'rejected' %}active{% endif %}">
+                Rədd edilmiş
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bid siyahısı -->
+<div class="row">
+    {% for bid in bids %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title">
+                        <a href="{% url 'projects:project_detail' bid.project.pk %}" class="text-decoration-none">
+                            {{ bid.project.title }}
+                        </a>
+                    </h5>
+                    <span class="badge bg-{% if bid.status == 'active' %}success{% elif bid.status == 'accepted' %}primary{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %}">
+                        {{ bid.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="mb-2">
+                    <strong class="text-success">{{ bid.bid_amount }}₼</strong>
+                    <small class="text-muted">• {{ bid.delivery_time }} gün</small>
+                </div>
+                
+                <p class="card-text text-muted">
+                    {{ bid.proposal|truncatewords:15 }}
+                </p>
+                
+                <div class="mb-2">
+                    {% if user.is_freelancer %}
+                    <small class="text-muted">
+                        <i class="fas fa-user"></i> Müştəri: {{ bid.project.customer.username }}
+                    </small>
+                    {% else %}
+                    <small class="text-muted">
+                        <i class="fas fa-user"></i> Freelancer: {{ bid.freelancer.username }}
+                    </small>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-clock"></i> {{ bid.created_at|date:"d.m.Y H:i" }}
+                    </small>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-transparent">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'bids:bid_detail' bid.pk %}" class="btn btn-outline-primary btn-sm">
+                        Ətraflı
+                    </a>
+                    
+                    {% if user.is_freelancer and bid.status == 'active' %}
+                    <form method="post" action="{% url 'bids:withdraw_bid' bid.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                onclick="return confirm('Təklifi geri çəkmək istədiyinizdən əminsiniz?')">
+                            Geri çək
+                        </button>
+                    </form>
+                    {% endif %}
+                    
+                    {% if not user.is_freelancer and bid.status == 'active' %}
+                    <form method="post" action="{% url 'bids:accept_bid' bid.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success btn-sm" 
+                                onclick="return confirm('Bu təklifi qəbul etmək istədiyinizdən əminsiniz?')">
+                            Qəbul et
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'bids:reject_bid' bid.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                onclick="return confirm('Bu təklifi rədd etmək istədiyinizdən əminsiniz?')">
+                            Rədd et
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Təklif tapılmadı</h4>
+            {% if user.is_freelancer %}
+                <p>Hələ heç bir layihəyə təklif göndərməmişsiniz.</p>
+                <a href="{% url 'projects:project_list' %}" class="btn btn-primary">Layihələrə baxın</a>
+            {% else %}
+                <p>Layihələrinizə hələ təklif gəlməyib.</p>
+                <a href="{% url 'projects:project_create' %}" class="btn btn-primary">Yeni layihə yaradın</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Bid səhifələri">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">İlk</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Əvvəlki</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Sonrakı</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Son</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

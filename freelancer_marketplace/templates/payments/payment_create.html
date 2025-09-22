@@ -1,0 +1,110 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Ödəniş Yarat - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-credit-card"></i> Yeni Ödəniş
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Məbləğ -->
+                    <div class="mb-3">
+                        <label for="{{ form.amount.id_for_label }}" class="form-label">
+                            {{ form.amount.label }} <span class="text-danger">*</span>
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div class="text-danger">{{ form.amount.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">
+                            Tövsiyə edilən məbləğ: Qəbul edilmiş təklifə görə
+                        </div>
+                    </div>
+                    
+                    <!-- Ödəniş növü -->
+                    <div class="mb-3">
+                        <label for="{{ form.payment_type.id_for_label }}" class="form-label">
+                            {{ form.payment_type.label }}
+                        </label>
+                        {{ form.payment_type }}
+                        {% if form.payment_type.errors %}
+                            <div class="text-danger">{{ form.payment_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Açıqlama -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            {{ form.description.label }}
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Form buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Ödəniş Yarat
+                        </button>
+                        <a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Geri qayıt
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Layihə məlumatları -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Layihə məlumatları</h6>
+            </div>
+            <div class="card-body">
+                <h5>{{ project.title }}</h5>
+                
+                <div class="mb-2">
+                    <strong>Freelancer:</strong><br>
+                    {{ project.assigned_freelancer.get_full_name|default:project.assigned_freelancer.username }}
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Status:</strong>
+                    <span class="badge bg-{% if project.status == 'completed' %}success{% else %}warning{% endif %}">
+                        {{ project.get_status_display }}
+                    </span>
+                </div>
+                
+                <div class="mb-0">
+                    <strong>Büdcə:</strong> {{ project.budget_min }}₼ - {{ project.budget_max }}₼
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ödəniş məlumatları -->
+        <div class="card">
+            <div class="card-body">
+                <h6 class="text-primary">Ödəniş Qaydaları</h6>
+                <ul class="small mb-0">
+                    <li>Ödəniş yaratdıqdan sonra "Gözləmədə" statusunda olacaq</li>
+                    <li>Siz təsdiqləyəndə freelancer ödənişi alacaq</li>
+                    <li>Ödəniş təsdiqlənəndə layihə "Tamamlandı" olacaq</li>
+                    <li>Uğursuz ödənişlər yenidən cəhd edilə bilər</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

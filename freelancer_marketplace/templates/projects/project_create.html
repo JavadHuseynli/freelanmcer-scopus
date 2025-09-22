@@ -1,0 +1,186 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Yeni Layihə Yarat - Freelancer Marketplace{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-plus"></i> Yeni Layihə Yarat
+                </h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Başlıq -->
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">
+                            Layihə başlığı <span class="text-danger">*</span>
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Layihənizi qısa və aydın şəkildə təsvir edin</div>
+                    </div>
+                    
+                    <!-- Kateqoriya və Təcillik -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    Kateqoriya <span class="text-danger">*</span>
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.urgency_level.id_for_label }}" class="form-label">
+                                    Təcillik səviyyəsi
+                                </label>
+                                {{ form.urgency_level }}
+                                {% if form.urgency_level.errors %}
+                                    <div class="text-danger">{{ form.urgency_level.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Təsvir -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Layihə təsviri <span class="text-danger">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Layihənizin təfərrüatlı təsvirini yazın</div>
+                    </div>
+                    
+                    <!-- Büdcə -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.budget_min.id_for_label }}" class="form-label">
+                                    Minimum büdcə (₼) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.budget_min }}
+                                {% if form.budget_min.errors %}
+                                    <div class="text-danger">{{ form.budget_min.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.budget_max.id_for_label }}" class="form-label">
+                                    Maksimum büdcə (₼) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.budget_max }}
+                                {% if form.budget_max.errors %}
+                                    <div class="text-danger">{{ form.budget_max.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Son tarix -->
+                    <div class="mb-3">
+                        <label for="{{ form.deadline.id_for_label }}" class="form-label">
+                            Son tarix <span class="text-danger">*</span>
+                        </label>
+                        {{ form.deadline }}
+                        {% if form.deadline.errors %}
+                            <div class="text-danger">{{ form.deadline.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Layihənin tamamlanma son tarixi</div>
+                    </div>
+                    
+                    <!-- Tələb olunan bacarıqlar -->
+                    <div class="mb-3">
+                        <label for="{{ form.skills_required.id_for_label }}" class="form-label">
+                            Tələb olunan bacarıqlar
+                        </label>
+                        {{ form.skills_required }}
+                        {% if form.skills_required.errors %}
+                            <div class="text-danger">{{ form.skills_required.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Vergüllərlə ayırın: EndNote, LaTeX, Academic Writing</div>
+                    </div>
+                    
+                    <!-- Əlavə tələblər -->
+                    <div class="mb-3">
+                        <label for="{{ form.requirements.id_for_label }}" class="form-label">
+                            Əlavə tələblər və qeydlər
+                        </label>
+                        {{ form.requirements }}
+                        {% if form.requirements.errors %}
+                            <div class="text-danger">{{ form.requirements.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Freelancerlər üçün əlavə məlumatlar</div>
+                    </div>
+                    
+                    <!-- Fayl yükləmə -->
+                    <div class="mb-3">
+                        <label for="{{ form.article_file.id_for_label }}" class="form-label">
+                            Məqalə faylı (isteğe bağlı)
+                        </label>
+                        {{ form.article_file }}
+                        {% if form.article_file.errors %}
+                            <div class="text-danger">{{ form.article_file.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">PDF, DOC, DOCX formatlarında fayl yükləyə bilərsiniz</div>
+                    </div>
+                    
+                    <!-- Form buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Layihəni Yayımla
+                        </button>
+                        <a href="{% url 'projects:project_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Ləğv et
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pricing Guide -->
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">💡 Qiymət Təyini Təlimatları</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Məqalə Redaktəsi:</h6>
+                        <ul class="list-unstyled">
+                            <li>• Qısa məqalə (5-10 səh): 100-200₼</li>
+                            <li>• Orta məqalə (10-20 səh): 200-400₼</li>
+                            <li>• Uzun məqalə (20+ səh): 400-800₼</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Scopus Dəstəyi:</h6>
+                        <ul class="list-unstyled">
+                            <li>• Jurnal seçimi: 50-100₼</li>
+                            <li>• Formatlaşdırma: 100-200₼</li>
+                            <li>• Tam dəstək: 300-600₼</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

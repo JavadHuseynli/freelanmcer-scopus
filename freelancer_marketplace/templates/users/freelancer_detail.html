@@ -1,0 +1,210 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{{ freelancer.get_full_name|default:freelancer.username }} - Freelancer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sol tərəf - Profil məlumatları -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <!-- Avatar -->
+                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" 
+                     style="width: 100px; height: 100px;">
+                    <span class="text-white display-4 fw-bold">{{ freelancer.username|first|upper }}</span>
+                </div>
+                
+                <!-- Ad və rol -->
+                <h4 class="card-title">{{ freelancer.get_full_name|default:freelancer.username }}</h4>
+                <p class="text-muted">@{{ freelancer.username }}</p>
+                
+                <!-- Status badge-lər -->
+                <div class="mb-3">
+                    <span class="badge bg-primary mb-1">{{ freelancer.get_role_display }}</span><br>
+                    {% if freelancer.is_verified %}
+                        <span class="badge bg-success mb-1">✓ Təsdiqlənib</span><br>
+                    {% endif %}
+                    {% if freelancer.experience_years > 0 %}
+                        <span class="badge bg-secondary mb-1">{{ freelancer.experience_years }} il təcrübə</span><br>
+                    {% endif %}
+                </div>
+                
+                <!-- Qiymət -->
+                {% if freelancer.hourly_rate %}
+                <div class="alert alert-success text-center">
+                    <h5 class="mb-0">{{ freelancer.hourly_rate }}₼</h5>
+                    <small>saatlıq tarif</small>
+                </div>
+                {% endif %}
+                
+                <!-- Əlaqə düymələri -->
+                {% if user.is_authenticated and user != freelancer %}
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary">Mesaj göndər</button>
+                    <button class="btn btn-outline-primary">İş təklif et</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Əlaqə məlumatları -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">Əlaqə məlumatları</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <i class="fas fa-envelope me-2"></i>{{ freelancer.email }}
+                </p>
+                {% if freelancer.phone %}
+                <p class="mb-2">
+                    <i class="fas fa-phone me-2"></i>{{ freelancer.phone }}
+                </p>
+                {% endif %}
+                <p class="mb-0">
+                    <i class="fas fa-calendar me-2"></i>{{ freelancer.created_at|date:"M Y" }} tarixindən bəri üzv
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sağ tərəf - Təfərrüatlı məlumatlar -->
+    <div class="col-md-8">
+        <!-- Haqqında bölməsi -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Haqqında</h5>
+            </div>
+            <div class="card-body">
+                {% if freelancer.specialization %}
+                <h6 class="text-primary">İxtisaslaşma</h6>
+                <p>{{ freelancer.specialization }}</p>
+                {% endif %}
+                
+                {% if freelancer.bio %}
+                <h6 class="text-primary mt-3">Təsvir</h6>
+                <p>{{ freelancer.bio|linebreaks }}</p>
+                {% else %}
+                <p class="text-muted">Bu freelancer hələ özü haqqında məlumat əlavə etməyib.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Bacarıqlar -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Bacarıqlar və Xidmətlər</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Əsas xidmətlər</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Elmi məqalə redaktəsi</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Scopus dəstəyi</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Mətn tərcüməsi</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Formatlaşdırma</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Texniki bacarıqlar</h6>
+                        <div>
+                            <span class="badge bg-light text-dark me-1 mb-1">EndNote</span>
+                            <span class="badge bg-light text-dark me-1 mb-1">LaTeX</span>
+                            <span class="badge bg-light text-dark me-1 mb-1">SPSS</span>
+                            <span class="badge bg-light text-dark me-1 mb-1">Academic Writing</span>
+                            <span class="badge bg-light text-dark me-1 mb-1">Proofreading</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Son layihələr və rəylər -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">Rəylər və Qiymətlər</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center text-muted">
+                    <p>Hələ rəy və qiymət yoxdur.</p>
+                    <small>Bu freelancer ilə işlədikdən sonra rəy yaza bilərsiniz.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Akademik məlumatlar -->
+<div class="card mt-3">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-graduation-cap"></i> Akademik Göstəricilər
+        </h6>
+    </div>
+    <div class="card-body">
+        {% if freelancer.h_index > 0 or freelancer.total_publications > 0 %}
+        <div class="row text-center mb-3">
+            <div class="col-3">
+                <h4 class="text-primary mb-0">{{ freelancer.h_index }}</h4>
+                <small class="text-muted">H-index</small>
+            </div>
+            <div class="col-3">
+                <h4 class="text-success mb-0">{{ freelancer.scopus_h_index }}</h4>
+                <small class="text-muted">Scopus H-index</small>
+            </div>
+            <div class="col-3">
+                <h4 class="text-info mb-0">{{ freelancer.total_publications }}</h4>
+                <small class="text-muted">Nəşrlər</small>
+            </div>
+            <div class="col-3">
+                <h4 class="text-warning mb-0">{{ freelancer.total_citations }}</h4>
+                <small class="text-muted">İstinadlar</small>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if freelancer.academic_degree %}
+        <p class="mb-2">
+            <strong>Akademik dərəcə:</strong> {{ freelancer.academic_degree }}
+        </p>
+        {% endif %}
+        
+        {% if freelancer.university_affiliation %}
+        <p class="mb-2">
+            <strong>Universitet:</strong> {{ freelancer.university_affiliation }}
+        </p>
+        {% endif %}
+        
+        {% if freelancer.research_interests %}
+        <p class="mb-2">
+            <strong>Tədqiqat sahələri:</strong><br>
+            <small>{{ freelancer.research_interests }}</small>
+        </p>
+        {% endif %}
+        
+        <!-- Profil linkləri -->
+        <div class="mt-3">
+            {% if freelancer.google_scholar_url %}
+            <a href="{{ freelancer.google_scholar_url }}" target="_blank" class="btn btn-outline-primary btn-sm me-2">
+                <i class="fab fa-google"></i> Google Scholar
+            </a>
+            {% endif %}
+            
+            {% if freelancer.orcid_id %}
+            <a href="https://orcid.org/{{ freelancer.orcid_id }}" target="_blank" class="btn btn-outline-success btn-sm me-2">
+                <i class="fab fa-orcid"></i> ORCID
+            </a>
+            {% endif %}
+            
+            {% if freelancer.scopus_author_id %}
+            <a href="https://www.scopus.com/authid/detail.uri?authorId={{ freelancer.scopus_author_id }}" target="_blank" class="btn btn-outline-info btn-sm">
+                <i class="fas fa-book"></i> Scopus
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Rəy Yaz - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-star"></i> Rəy və Qiymətləndirmə
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <!-- Ümumi qiymət -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.rating.label }} <span class="text-danger">*</span></label>
+                        {{ form.rating }}
+                        <div class="form-text">Freelancer ilə ümumi təcrübənizi qiymətləndirin</div>
+                    </div>
+                    
+                    <!-- Ətraflı qiymətləndirmələr -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.quality_rating.label }}</label>
+                                {{ form.quality_rating }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.communication_rating.label }}</label>
+                                {{ form.communication_rating }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.timeliness_rating.label }}</label>
+                                {{ form.timeliness_rating }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rəy -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.comment.label }} <span class="text-danger">*</span></label>
+                        {{ form.comment }}
+                    </div>
+                    
+                    <!-- Tövsiyə checkbox-ları -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.would_recommend }}
+                            <label class="form-check-label" for="{{ form.would_recommend.id_for_label }}">
+                                {{ form.would_recommend.label }}
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            {{ form.would_hire_again }}
+                            <label class="form-check-label" for="{{ form.would_hire_again.id_for_label }}">
+                                {{ form.would_hire_again.label }}
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-star"></i> Rəyi Göndər
+                        </button>
+                        <a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Geri qayıt
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Freelancer məlumatları -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Haqqında rəy yazdığınız freelancer</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="bg-success rounded-circle mx-auto d-flex align-items-center justify-content-center" 
+                         style="width: 60px; height: 60px;">
+                        <span class="text-white h4 mb-0">{{ project.assigned_freelancer.username|first|upper }}</span>
+                    </div>
+                    <h5 class="mt-2">{{ project.assigned_freelancer.get_full_name|default:project.assigned_freelancer.username }}</h5>
+                    <small class="text-muted">@{{ project.assigned_freelancer.username }}</small>
+                </div>
+                
+                {% if project.assigned_freelancer.specialization %}
+                <p class="text-center">
+                    <small>{{ project.assigned_freelancer.specialization }}</small>
+                </p>
+                {% endif %}
+                
+                <div class="text-center">
+                    <span class="badge bg-secondary">{{ project.assigned_freelancer.experience_years }} il təcrübə</span>
+                    {% if project.assigned_freelancer.hourly_rate %}
+                    <span class="badge bg-success">{{ project.assigned_freelancer.hourly_rate }}₼/saat</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

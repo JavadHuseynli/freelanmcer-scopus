@@ -1,0 +1,105 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Freelancerlər - Freelancer Marketplace{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Freelancerlər</h2>
+    <p class="text-muted">{{ freelancers|length }} freelancer tapıldı</p>
+</div>
+
+<div class="row">
+    {% for freelancer in freelancers %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px;">
+                        <span class="text-white fw-bold">{{ freelancer.username|first|upper }}</span>
+                    </div>
+                    <div>
+                        <h5 class="card-title mb-0">{{ freelancer.get_full_name|default:freelancer.username }}</h5>
+                        <small class="text-muted">@{{ freelancer.username }}</small>
+                    </div>
+                </div>
+                
+                {% if freelancer.specialization %}
+                <p class="card-text">
+                    <strong>İxtisas:</strong> {{ freelancer.specialization }}
+                </p>
+                {% endif %}
+                
+                <div class="mb-2">
+                    {% if freelancer.experience_years > 0 %}
+                        <span class="badge bg-secondary">{{ freelancer.experience_years }} il təcrübə</span>
+                    {% endif %}
+                    
+                    {% if freelancer.hourly_rate %}
+                        <span class="badge bg-success">{{ freelancer.hourly_rate }}₼/saat</span>
+                    {% endif %}
+                    
+                    {% if freelancer.is_verified %}
+                        <span class="badge bg-primary">✓ Təsdiqlənib</span>
+                    {% endif %}
+                </div>
+                
+                {% if freelancer.bio %}
+                <p class="card-text text-muted">
+                    {{ freelancer.bio|truncatewords:15 }}
+                </p>
+                {% endif %}
+            </div>
+            
+            <div class="card-footer bg-transparent">
+                <a href="{% url 'users:freelancer_detail' freelancer.pk %}" class="btn btn-outline-primary btn-sm">
+                    Profili gör
+                </a>
+                {% if user.is_authenticated and user.is_customer %}
+                <a href="#" class="btn btn-primary btn-sm">Mesaj göndər</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <h4>Freelancer tapılmadı</h4>
+            <p>Hazırda aktiv freelancer yoxdur. Sonra yenidən yoxlayın.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Freelancer səhifələri">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">İlk</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Əvvəlki</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Sonrakı</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Son</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Profil - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ user.get_full_name|default:user.username }}</h5>
+                <p class="card-text">
+                    <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                </p>
+                {% if user.is_freelancer and user.specialization %}
+                    <p class="text-muted">{{ user.specialization }}</p>
+                {% endif %}
+                
+                {% if user.is_freelancer %}
+                    <div class="mt-3">
+                        <small class="text-muted">Təcrübə: {{ user.experience_years }} il</small><br>
+                        {% if user.hourly_rate %}
+                            <small class="text-muted">Saatlıq tarif: {{ user.hourly_rate }}₼</small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Profil Məlumatları</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <tr>
+                        <th>İstifadəçi adı:</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ad:</th>
+                        <td>{{ user.first_name|default:"Təyin edilməyib" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Soyad:</th>
+                        <td>{{ user.last_name|default:"Təyin edilməyib" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Telefon:</th>
+                        <td>{{ user.phone|default:"Təyin edilməyib" }}</td>
+                    </tr>
+                    {% if user.bio %}
+                    <tr>
+                        <th>Haqqında:</th>
+                        <td>{{ user.bio }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+                
+                <div class="mt-3">
+                    <a href="#" class="btn btn-primary">Profili redaktə et</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

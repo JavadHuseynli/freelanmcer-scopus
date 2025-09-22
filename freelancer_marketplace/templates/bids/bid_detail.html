@@ -1,0 +1,373 @@
+{% extends 'base.html' %}
+
+{% block title %}Təklif - {{ bid.project.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sol tərəf - Təklif məlumatları -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h3>{{ bid.project.title }}</h3>
+                    <span class="badge bg-{% if bid.status == 'active' %}success{% elif bid.status == 'accepted' %}primary{% elif bid.status == 'rejected' %}danger{% else %}secondary{% endif %} fs-6">
+                        {{ bid.get_status_display }}
+                    </span>
+                </div>
+                
+                <!-- Təklif məlumat kartları -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-success mb-0">{{ bid.bid_amount }}₼</h4>
+                            <small class="text-muted">Təklif məbləği</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-info mb-0">{{ bid.delivery_time }}</h4>
+                            <small class="text-muted">Gün</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h4 class="text-warning mb-0">{{ bid.project.bid_count }}</h4>
+                            <small class="text-muted">Rəqib təklif</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status məlumatı -->
+                {% if bid.status == 'accepted' %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Təbriklər!</strong> Təklifiniz qəbul edildi. Müştəri ilə əlaqə saxlayın.
+                </div>
+                {% elif bid.status == 'rejected' %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle"></i>
+                    <strong>Təklif rədd edildi.</strong> Narahat olmayın, digər layihələrə təklif göndərə bilərsiniz.
+                </div>
+                {% elif bid.status == 'withdrawn' %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-undo"></i>
+                    <strong>Təklif geri çəkildi.</strong> Bu təklifi yenidən aktivləşdirə bilməzsiniz.
+                </div>
+                {% elif bid.status == 'active' %}
+                <div class="alert alert-info">
+                    <i class="fas fa-clock"></i>
+                    <strong>Təklif gözləmədə.</strong> Müştəri cavabını gözləyin.
+                </div>
+                {% endif %}
+                
+                <!-- Təklif təsviri -->
+                <h5>Təklif təsviri</h5>
+                <div class="bg-light p-4 rounded mb-4" style="line-height: 1.6;">
+                    {{ bid.proposal|linebreaks }}
+                </div>
+                
+                <!-- Təklif və layihə müqayisəsi -->
+                <h5>Müqayisə</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="30%">Büdcə aralığı</th>
+                                <td>{{ bid.project.budget_min }}₼ - {{ bid.project.budget_max }}₼</td>
+                                <td class="{% if bid.bid_amount >= bid.project.budget_min and bid.bid_amount <= bid.project.budget_max %}text-success{% else %}text-warning{% endif %}">
+                                    Təklifiniz: {{ bid.bid_amount }}₼
+                                    {% if bid.bid_amount < bid.project.budget_min %}
+                                    <small class="d-block">Aşağı qiymət</small>
+                                    {% elif bid.bid_amount > bid.project.budget_max %}
+                                    <small class="d-block">Yüksək qiymət</small>
+                                    {% else %}
+                                    <small class="d-block text-success">Büdcəyə uyğun</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Son tarix</th>
+                                <td>{{ bid.project.deadline|date:"d.m.Y H:i" }}</td>
+                                <td>{{ bid.delivery_time }} gün ərzində</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>{{ bid.project.get_status_display }}</td>
+                                <td>{{ bid.get_status_display }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Tarix məlumatları -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>Təklif tarixi:</strong><br>
+                            <i class="fas fa-calendar"></i> {{ bid.created_at|date:"d.m.Y H:i" }}
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>Son yenilənmə:</strong><br>
+                            <i class="fas fa-sync"></i> {{ bid.updated_at|date:"d.m.Y H:i" }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-footer bg-transparent">
+                <div class="d-flex gap-2 flex-wrap">
+                    <!-- Freelancer üçün düymələr -->
+                    {% if user == bid.freelancer %}
+                        {% if bid.status == 'active' %}
+                            <form method="post" action="{% url 'bids:withdraw_bid' bid.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger" 
+                                        onclick="return confirm('Təklifi geri çəkmək istədiyinizdən əminsiniz? Bu əməliyyat geri qaytarıla bilməz.')">
+                                    <i class="fas fa-undo"></i> Təklifi Geri Çək
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <a href="{% url 'bids:bid_list' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-list"></i> Təkliflərim
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Müştəri üçün düymələr -->
+                    {% if user == bid.project.customer %}
+                        {% if bid.status == 'active' %}
+                            <form method="post" action="{% url 'bids:accept_bid' bid.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success" 
+                                        onclick="return confirm('Bu təklifi qəbul etmək istədiyinizdən əminsiniz? Layihə \'İcrada\' statusuna keçəcək və digər təkliflər rədd ediləcək.')">
+                                    <i class="fas fa-check"></i> Təklifi Qəbul Et
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'bids:reject_bid' bid.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger" 
+                                        onclick="return confirm('Bu təklifi rədd etmək istədiyinizdən əminsiniz?')">
+                                    <i class="fas fa-times"></i> Rədd Et
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <a href="{% url 'users:freelancer_detail' bid.freelancer.pk %}" class="btn btn-outline-info">
+                            <i class="fas fa-user"></i> Freelancer Profili
+                        </a>
+                    {% endif %}
+                    
+                    <!-- Ümumi düymələr -->
+                    <a href="{% url 'projects:project_detail' bid.project.pk %}" class="btn btn-outline-primary">
+                        <i class="fas fa-eye"></i> Layihəyə Bax
+                    </a>
+                    
+                    {% if bid.status == 'accepted' %}
+                    <button class="btn btn-outline-success" disabled>
+                        <i class="fas fa-comments"></i> Mesajlaşma (tezliklə)
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Layihə təsviri -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Layihə təfərrüatları</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ bid.project.description|linebreaks }}</p>
+                
+                {% if bid.project.requirements %}
+                <h6 class="text-primary mt-3">Əlavə tələblər</h6>
+                <p>{{ bid.project.requirements|linebreaks }}</p>
+                {% endif %}
+                
+                {% if bid.project.skills_required %}
+                <h6 class="text-primary mt-3">Tələb olunan bacarıqlar</h6>
+                <p><span class="badge bg-primary">{{ bid.project.skills_required }}</span></p>
+                {% endif %}
+                
+                {% if bid.project.article_file %}
+                <h6 class="text-primary mt-3">Əlavə fayl</h6>
+                <p>
+                    <a href="{{ bid.project.article_file.url }}" class="btn btn-outline-primary btn-sm" download>
+                        <i class="fas fa-download"></i> Faylı endir
+                    </a>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sağ tərəf - Təklif statistikaları və iştirakçılar -->
+    <div class="col-md-4">
+        <!-- Layihə məlumatları -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Layihə məlumatları</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <span class="badge bg-secondary">{{ bid.project.get_category_display }}</span>
+                    <span class="badge bg-{% if bid.project.urgency_level == 'urgent' %}danger{% elif bid.project.urgency_level == 'high' %}warning{% else %}info{% endif %}">
+                        {{ bid.project.get_urgency_level_display }}
+                    </span>
+                </div>
+                
+                <p class="mb-2">
+                    <strong>Büdcə:</strong> {{ bid.project.budget_min }}₼ - {{ bid.project.budget_max }}₼
+                </p>
+                
+                <p class="mb-2">
+                    <strong>Son tarix:</strong><br>
+                    <small>{{ bid.project.deadline|date:"d.m.Y H:i" }}</small>
+                </p>
+                
+                <p class="mb-2">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{% if bid.project.status == 'open' %}success{% elif bid.project.status == 'in_progress' %}warning{% else %}secondary{% endif %}">
+                        {{ bid.project.get_status_display }}
+                    </span>
+                </p>
+                
+                {% if bid.project.assigned_freelancer %}
+                <p class="mb-0">
+                    <strong>Təyin edilmiş:</strong><br>
+                    <small>
+                        {% if bid.project.assigned_freelancer == bid.freelancer %}
+                            <span class="text-success">{{ bid.freelancer.username }} (Siz)</span>
+                        {% else %}
+                            {{ bid.project.assigned_freelancer.username }}
+                        {% endif %}
+                    </small>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- İstifadəçi məlumatları -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    {% if user == bid.freelancer %}Müştəri{% else %}Freelancer{% endif %} məlumatları
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if user == bid.freelancer %}
+                    <!-- Müştəri məlumatları -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 40px; height: 40px;">
+                            <span class="text-white fw-bold">{{ bid.project.customer.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ bid.project.customer.get_full_name|default:bid.project.customer.username }}</h6>
+                            <small class="text-muted">@{{ bid.project.customer.username }}</small>
+                        </div>
+                    </div>
+                    
+                    <p class="mb-2">
+                        <i class="fas fa-envelope me-2"></i>{{ bid.project.customer.email }}
+                    </p>
+                    
+                    <p class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>{{ bid.project.customer.created_at|date:"M Y" }} tarixindən bəri
+                    </p>
+                {% else %}
+                    <!-- Freelancer məlumatları -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 40px; height: 40px;">
+                            <span class="text-white fw-bold">{{ bid.freelancer.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ bid.freelancer.get_full_name|default:bid.freelancer.username }}</h6>
+                            <small class="text-muted">@{{ bid.freelancer.username }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if bid.freelancer.specialization %}
+                    <p class="mb-2">
+                        <strong>İxtisas:</strong><br>
+                        <small>{{ bid.freelancer.specialization }}</small>
+                    </p>
+                    {% endif %}
+                    
+                    <p class="mb-2">
+                        <strong>Təcrübə:</strong> {{ bid.freelancer.experience_years }} il
+                    </p>
+                    
+                    {% if bid.freelancer.hourly_rate %}
+                    <p class="mb-2">
+                        <strong>Saatlıq tarif:</strong> {{ bid.freelancer.hourly_rate }}₼
+                    </p>
+                    {% endif %}
+                    
+                    <p class="mb-0">
+                        <strong>Üzv olma:</strong><br>
+                        <small>{{ bid.freelancer.created_at|date:"M Y" }}</small>
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Təklif rəqabəti -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Rəqabət vəziyyəti</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h4 class="text-primary">{{ bid.project.bid_count }}</h4>
+                    <small class="text-muted">Ümumi təklif sayı</small>
+                </div>
+                
+                {% if user == bid.project.customer %}
+                <div class="mb-2">
+                    <strong>Təklif statusları:</strong>
+                </div>
+                <div class="row text-center small">
+                    <div class="col-3">
+                        <div class="text-success">{{ bid.project.bids.all|length }}</div>
+                        <div class="text-muted">Ümumi</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="text-info">
+                            {% for project_bid in bid.project.bids.all %}
+                                {% if project_bid.status == 'active' %}1{% endif %}
+                            {% empty %}0{% endfor %}
+                        </div>
+                        <div class="text-muted">Aktiv</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="text-primary">
+                            {% for project_bid in bid.project.bids.all %}
+                                {% if project_bid.status == 'accepted' %}1{% endif %}
+                            {% empty %}0{% endfor %}
+                        </div>
+                        <div class="text-muted">Qəbul</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="text-danger">
+                            {% for project_bid in bid.project.bids.all %}
+                                {% if project_bid.status == 'rejected' %}1{% endif %}
+                            {% empty %}0{% endfor %}
+                        </div>
+                        <div class="text-muted">Rədd</div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">
+                    Bu layihəyə {{ bid.project.bid_count }} freelancer maraq göstərib. 
+                    Təklifinizin unikal və rəqabətli olmasına diqqət edin.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

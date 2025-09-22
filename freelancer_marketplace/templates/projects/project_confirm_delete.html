@@ -1,0 +1,54 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Layihəni Sil - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Layihəni Sil
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <strong>Diqqət!</strong> Bu əməliyyat geri qaytarıla bilməz.
+                </div>
+                
+                <p>Bu layihəni silmək istədiyinizdən əminsiniz?</p>
+                
+                <div class="bg-light p-3 rounded mb-3">
+                    <h6 class="mb-2">{{ project.title }}</h6>
+                    <small class="text-muted">
+                        {{ project.get_category_display }} • 
+                        {{ project.budget_min }}₼-{{ project.budget_max }}₼ • 
+                        {{ project.bid_count }} təklif
+                    </small>
+                </div>
+                
+                {% if project.bid_count > 0 %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Bu layihəyə <strong>{{ project.bid_count }} təklif</strong> gəlib. 
+                    Layihəni silsəniz, bütün təkliflər də silinəcək.
+                </div>
+                {% endif %}
+                
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Ləğv et
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Bəli, Sil
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

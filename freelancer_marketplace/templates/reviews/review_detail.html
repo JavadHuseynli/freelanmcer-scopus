@@ -1,0 +1,94 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Rəy - {{ review.project.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h3>{{ review.project.title }}</h3>
+                
+                <div class="mb-4">
+                    <div class="text-warning mb-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star fa-lg"></i>
+                            {% else %}
+                                <i class="far fa-star fa-lg"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="ms-2 h5">{{ review.rating }}/5</span>
+                    </div>
+                </div>
+                
+                <h5>Rəy</h5>
+                <p class="mb-4">{{ review.comment|linebreaks }}</p>
+                
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <h6>Keyfiyyət</h6>
+                        <div class="text-warning">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.quality_rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Ünsiyyət</h6>
+                        <div class="text-warning">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.communication_rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Vaxtında təslim</h6>
+                        <div class="text-warning">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.timeliness_rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if review.would_recommend %}
+                <div class="alert alert-success">
+                    <i class="fas fa-thumbs-up"></i> Bu freelancer-i başqalarına tövsiyə edir
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Rəy məlumatları</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Freelancer:</strong><br>{{ review.freelancer.username }}</p>
+                <p><strong>Müştəri:</strong><br>{{ review.reviewer.username }}</p>
+                <p><strong>Tarix:</strong><br>{{ review.created_at|date:"d.m.Y" }}</p>
+                
+                <a href="{% url 'projects:project_detail' review.project.pk %}" class="btn btn-outline-primary">
+                    Layihəyə bax
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

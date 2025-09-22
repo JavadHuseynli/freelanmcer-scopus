@@ -1,0 +1,179 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Layihəni Redaktə Et - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="fas fa-edit"></i> Layihəni Redaktə Et
+                </h3>
+                <small class="text-muted">{{ project.title }}</small>
+            </div>
+            <div class="card-body">
+                {% if project.status != 'open' %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Diqqət:</strong> Bu layihə artıq {{ project.get_status_display }} statusundadır. 
+                    Bəzi dəyişikliklər freelancerləri təsir edə bilər.
+                </div>
+                {% endif %}
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Status -->
+                    <div class="mb-3">
+                        <label class="form-label">Cari Status</label>
+                        <div>
+                            <span class="badge bg-{% if project.status == 'open' %}success{% elif project.status == 'in_progress' %}warning{% else %}secondary{% endif %} fs-6">
+                                {{ project.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Başlıq -->
+                    <div class="mb-3">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">
+                            Layihə başlığı <span class="text-danger">*</span>
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Kateqoriya və Təcillik -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label">
+                                    Kateqoriya <span class="text-danger">*</span>
+                                </label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.urgency_level.id_for_label }}" class="form-label">
+                                    Təcillik səviyyəsi
+                                </label>
+                                {{ form.urgency_level }}
+                                {% if form.urgency_level.errors %}
+                                    <div class="text-danger">{{ form.urgency_level.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Təsvir -->
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Layihə təsviri <span class="text-danger">*</span>
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Büdcə -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.budget_min.id_for_label }}" class="form-label">
+                                    Minimum büdcə (₼) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.budget_min }}
+                                {% if form.budget_min.errors %}
+                                    <div class="text-danger">{{ form.budget_min.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.budget_max.id_for_label }}" class="form-label">
+                                    Maksimum büdcə (₼) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.budget_max }}
+                                {% if form.budget_max.errors %}
+                                    <div class="text-danger">{{ form.budget_max.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Son tarix -->
+                    <div class="mb-3">
+                        <label for="{{ form.deadline.id_for_label }}" class="form-label">
+                            Son tarix <span class="text-danger">*</span>
+                        </label>
+                        {{ form.deadline }}
+                        {% if form.deadline.errors %}
+                            <div class="text-danger">{{ form.deadline.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Tələb olunan bacarıqlar -->
+                    <div class="mb-3">
+                        <label for="{{ form.skills_required.id_for_label }}" class="form-label">
+                            Tələb olunan bacarıqlar
+                        </label>
+                        {{ form.skills_required }}
+                        {% if form.skills_required.errors %}
+                            <div class="text-danger">{{ form.skills_required.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Əlavə tələblər -->
+                    <div class="mb-3">
+                        <label for="{{ form.requirements.id_for_label }}" class="form-label">
+                            Əlavə tələblər və qeydlər
+                        </label>
+                        {{ form.requirements }}
+                        {% if form.requirements.errors %}
+                            <div class="text-danger">{{ form.requirements.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Fayl yükləmə -->
+                    <div class="mb-3">
+                        <label for="{{ form.article_file.id_for_label }}" class="form-label">
+                            Məqalə faylı
+                        </label>
+                        {% if project.article_file %}
+                        <div class="mb-2">
+                            <small class="text-muted">Cari fayl: </small>
+                            <a href="{{ project.article_file.url }}" target="_blank">
+                                {{ project.article_file.name|basename }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        {{ form.article_file }}
+                        {% if form.article_file.errors %}
+                            <div class="text-danger">{{ form.article_file.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Yeni fayl seçsəniz köhnəsi əvəz olunacaq</div>
+                    </div>
+                    
+                    <!-- Form buttons -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Dəyişiklikləri Saxla
+                        </button>
+                        <a href="{% url 'projects:project_detail' project.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Geri qayıt
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

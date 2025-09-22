@@ -1,0 +1,47 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Ana Səhifə - Freelancer Marketplace{% endblock %}
+
+{% block content %}
+<div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+    <h1 class="display-4">Elmi Məqalə Redaktə Platforması</h1>
+    <p class="lead">Scopus indexed jurnallar üçün məqalə hazırlığı və redaktə xidmətləri</p>
+    <hr class="my-4">
+    <p>Peşəkar freelancerlərlə əlaqə saxlayın və elmi məqalələrinizi ən yüksək standartlarda hazırlayın.</p>
+    {% if not user.is_authenticated %}
+        <a class="btn btn-light btn-lg" href="{% url 'users:register' %}">İndi Başlayın</a>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Məqalə Redaktəsi</h5>
+                <p class="card-text">SCI və Scopus indexed jurnallar üçün məqalə redaktə xidmətləri</p>
+                 <a href="{% url 'projects:project_list' %}" class="btn btn-primary">Layihələrə bax</a>
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Scopus Dəstəyi</h5>
+                <p class="card-text">Scopus indeksləşdirmə və jurnal seçimi üzrə məsləhət xidmətləri</p>
+                <a href="{% url 'users:freelancer_list' %}" class="btn btn-primary">Freelancerlər</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Tərcümə Xidməti</h5>
+                <p class="card-text">Peşəkar elmi tərcümə və dil redaktəsi xidmətləri</p>
+             <a href="{% url 'projects:project_create' %}" class="btn btn-primary">Layihə yarat</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

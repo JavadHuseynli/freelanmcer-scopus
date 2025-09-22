@@ -1,0 +1,212 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Ödəniş - {{ payment.project.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3>Ödəniş Təfərrüatları</h3>
+                    <span class="badge bg-{% if payment.status == 'paid' %}success{% elif payment.status == 'pending' %}warning{% elif payment.status == 'failed' %}danger{% else %}secondary{% endif %} fs-6">
+                        {{ payment.get_status_display }}
+                    </span>
+                </div>
+                
+                <!-- Ödəniş məbləği -->
+                <div class="text-center mb-4 p-4 bg-light rounded">
+                    <h2 class="text-success mb-2">{{ payment.amount }}₼</h2>
+                    <p class="text-muted mb-0">{{ payment.get_payment_type_display }}</p>
+                </div>
+                
+                <!-- Status mesajları -->
+                {% if payment.status == 'paid' %}
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <strong>Ödəniş tamamlandı!</strong> Tranzaksiya uğurla həyata keçirildi.
+                </div>
+                {% elif payment.status == 'pending' %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-clock"></i>
+                    <strong>Ödəniş gözləmədə.</strong> 
+                    {% if user == payment.payer %}
+                    Ödənişi təsdiqləməlisiniz.
+                    {% else %}
+                    Müştəri tərəfindən təsdiq gözlənilir.
+                    {% endif %}
+                </div>
+                {% elif payment.status == 'failed' %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle"></i>
+                    <strong>Ödəniş uğursuz oldu.</strong> Yenidən cəhd edin və ya dəstəklə əlaqə saxlayın.
+                </div>
+                {% endif %}
+                
+                <!-- Ödəniş məlumatları -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th width="30%">Layihə</th>
+                                <td>
+                                    <a href="{% url 'projects:project_detail' payment.project.pk %}" class="text-decoration-none">
+                                        {{ payment.project.title }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Ödəyici (Müştəri)</th>
+                                <td>{{ payment.payer.get_full_name|default:payment.payer.username }}</td>
+                            </tr>
+                            <tr>
+                                <th>Alan (Freelancer)</th>
+                                <td>
+                                    <a href="{% url 'users:freelancer_detail' payment.receiver.pk %}" class="text-decoration-none">
+                                        {{ payment.receiver.get_full_name|default:payment.receiver.username }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Məbləğ</th>
+                                <td><strong class="text-success">{{ payment.amount }}₼</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Ödəniş növü</th>
+                                <td>{{ payment.get_payment_type_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="badge bg-{% if payment.status == 'paid' %}success{% elif payment.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                        {{ payment.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% if payment.transaction_id %}
+                            <tr>
+                                <th>Tranzaksiya ID</th>
+                                <td><code>{{ payment.transaction_id }}</code></td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>Yaradılma tarixi</th>
+                                <td>{{ payment.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            {% if payment.paid_at %}
+                            <tr>
+                                <th>Ödəniş tarixi</th>
+                                <td>{{ payment.paid_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Açıqlama -->
+                {% if payment.description %}
+                <h5>Açıqlama</h5>
+                <div class="bg-light p-3 rounded mb-4">
+                    {{ payment.description|linebreaks }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="card-footer bg-transparent">
+                <div class="d-flex gap-2">
+                    {% if user == payment.payer and payment.status == 'pending' %}
+                    <form method="post" action="{% url 'payments:payment_confirm' payment.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success" 
+                                onclick="return confirm('Ödənişi təsdiqləmək istədiyinizdən əminsiniz? Bu əməliyyat geri qaytarıla bilməz.')">
+                            <i class="fas fa-check"></i> Ödənişi Təsdiqlə
+                        </button>
+                    </form>
+                    
+                    {% endif %}
+                    
+                    <a href="{% url 'payments:payment_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list"></i> Ödəniş Siyahısı
+                    </a>
+                    
+                    <a href="{% url 'projects:project_detail' payment.project.pk %}" class="btn btn-outline-info">
+                        <i class="fas fa-eye"></i> Layihəyə Bax
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Layihə məlumatları -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">Layihə məlumatları</h6>
+            </div>
+            <div class="card-body">
+                <h5>{{ payment.project.title }}</h5>
+                
+                <div class="mb-2">
+                    <span class="badge bg-secondary">{{ payment.project.get_category_display }}</span>
+                    <span class="badge bg-{% if payment.project.status == 'completed' %}success{% elif payment.project.status == 'in_progress' %}warning{% else %}info{% endif %}">
+                        {{ payment.project.get_status_display }}
+                    </span>
+                </div>
+                
+                <p class="mb-2">
+                    <strong>Büdcə:</strong> {{ payment.project.budget_min }}₼ - {{ payment.project.budget_max }}₼
+                </p>
+                
+                <p class="mb-0">
+                    <strong>Son tarix:</strong><br>
+                    <small>{{ payment.project.deadline|date:"d.m.Y H:i" }}</small>
+                </p>
+            </div>
+        </div>
+        
+        <!-- İstifadəçi məlumatları -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    {% if user == payment.payer %}Freelancer{% else %}Müştəri{% endif %} məlumatları
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if user == payment.payer %}
+                    <!-- Freelancer məlumatları -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 40px; height: 40px;">
+                            <span class="text-white fw-bold">{{ payment.receiver.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ payment.receiver.get_full_name|default:payment.receiver.username }}</h6>
+                            <small class="text-muted">@{{ payment.receiver.username }}</small>
+                        </div>
+                    </div>
+                    
+                    {% if payment.receiver.specialization %}
+                    <p class="mb-2">
+                        <strong>İxtisas:</strong><br>
+                        <small>{{ payment.receiver.specialization }}</small>
+                    </p>
+                    {% endif %}
+                {% else %}
+                    <!-- Müştəri məlumatları -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 40px; height: 40px;">
+                            <span class="text-white fw-bold">{{ payment.payer.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ payment.payer.get_full_name|default:payment.payer.username }}</h6>
+                            <small class="text-muted">@{{ payment.payer.username }}</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
